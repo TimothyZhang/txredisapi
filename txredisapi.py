@@ -1966,10 +1966,14 @@ class ShardedConnectionHandler(object):
 
         defer.returnValue(result)
 
-    def eval(self, script, key, args=[]):
+    def eval(self, script, keys, args=[]):
         """
         restrict eval to use one and only one key, for sharding
         """
+        if not isinstance(keys, (list, tuple)) or len(keys) != 1:
+            raise ValueError("eval accepts one and only one key.")
+
+        key = keys[0]
         m = _findhash.match(key)
         if m is not None and len(m.groups()) >= 1:
             node = self._ring(m.groups()[0])
@@ -1978,10 +1982,14 @@ class ShardedConnectionHandler(object):
 
         return node.eval(script, [key], args)
 
-    def evalsha(self, sha1_hash, key, args=[]):
+    def evalsha(self, sha1_hash, keys, args=[]):
         """
         restrict evalsha to use one and only one key, for sharding
         """
+        if not isinstance(keys, (list, tuple)) or len(keys) != 1:
+            raise ValueError("evalsha accepts one and only one key.")
+
+        key = keys[0]
         m = _findhash.match(key)
         if m is not None and len(m.groups()) >= 1:
             node = self._ring(m.groups()[0])
