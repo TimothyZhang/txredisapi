@@ -1966,6 +1966,30 @@ class ShardedConnectionHandler(object):
 
         defer.returnValue(result)
 
+    def eval(self, script, key, args=[]):
+        """
+        restrict eval to use one and only one key, for sharding
+        """
+        m = _findhash.match(key)
+        if m is not None and len(m.groups()) >= 1:
+            node = self._ring(m.groups()[0])
+        else:
+            node = self._ring(key)
+
+        return node.eval(script, [key], args)
+
+    def evalsha(self, sha1_hash, key, args=[]):
+        """
+        restrict evalsha to use one and only one key, for sharding
+        """
+        m = _findhash.match(key)
+        if m is not None and len(m.groups()) >= 1:
+            node = self._ring(m.groups()[0])
+        else:
+            node = self._ring(key)
+
+        return node.evalsha(sha1_hash, [key], args)
+
     def __repr__(self):
         nodes = []
         for conn in self._ring.nodes:
